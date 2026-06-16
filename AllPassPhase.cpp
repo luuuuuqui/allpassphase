@@ -15,6 +15,17 @@
 
 #include "AllPassPhase.h"
 
+namespace {
+float clampParameter(float value)
+{
+	if (value < 0.0f)
+		return 0.0f;
+	if (value > 1.0f)
+		return 1.0f;
+	return value;
+}
+}
+
 //-----------------------------------------------------------------------------
 AllPassPhaseProgram::AllPassPhaseProgram ()
 {
@@ -33,8 +44,11 @@ AllPassPhase::AllPassPhase (audioMasterCallback audioMaster)
 {
 	// init
 
-	size = 44100;
-	buffer = new float[size];
+	tempBufferL = 0;
+	tempBufferR = 0;
+	filterBufferL = 0;
+	filterBufferR = 0;
+	bufferSize = 0;
 
 	programs = new AllPassPhaseProgram[numPrograms];
 	fFrequency = 0.3675f;
@@ -54,6 +68,7 @@ AllPassPhase::AllPassPhase (audioMasterCallback audioMaster)
 	freq = knobToFrequency(fFrequency);
 	q = fQ * sqrt(2.0f);
 	setupFilters();
+	lastfFreq = fFrequency;
 
 	resume ();		// flush buffer
 }
@@ -61,8 +76,7 @@ AllPassPhase::AllPassPhase (audioMasterCallback audioMaster)
 //------------------------------------------------------------------------
 AllPassPhase::~AllPassPhase ()
 {
-	if (buffer)
-		delete[] buffer;
+	releaseBuffers();
 	if (programs)
 		delete[] programs;
 }
@@ -70,6 +84,9 @@ AllPassPhase::~AllPassPhase ()
 //------------------------------------------------------------------------
 void AllPassPhase::setProgram (long program)
 {
+	if (program < 0 || program >= kNumPrograms)
+		return;
+
 	AllPassPhaseProgram* ap = &programs[program];
 
 	curProgram = program;
@@ -97,7 +114,7 @@ void AllPassPhase::getProgramName (char *name)
 //-----------------------------------------------------------------------------------------
 bool AllPassPhase::getProgramNameIndexed (VstInt32 category, VstInt32 index, char* text)
 {
-	if (index < kNumPrograms)
+	if (index >= 0 && index < kNumPrograms)
 	{
 		vst_strncpy (text, programs[index].name, kVstMaxProgNameLen);
 		return true;
@@ -108,14 +125,35 @@ bool AllPassPhase::getProgramNameIndexed (VstInt32 category, VstInt32 index, cha
 //------------------------------------------------------------------------
 void AllPassPhase::resume ()
 {
-	memset (buffer, 0, size * sizeof (float));
+	if (tempBufferL)
+		memset (tempBufferL, 0, bufferSize * sizeof (float));
+	if (tempBufferR)
+		memset (tempBufferR, 0, bufferSize * sizeof (float));
+	if (filterBufferL)
+		memset (filterBufferL, 0, bufferSize * sizeof (float));
+	if (filterBufferR)
+		memset (filterBufferR, 0, bufferSize * sizeof (float));
+
+	for (int i = 0; i < kMaxFilters; i++) {
+		filterL[i].zeroBuffers();
+		filterR[i].zeroBuffers();
+	}
+
+	samplesSinceSilence = deactivateAfterSamples;
 	AudioEffectX::resume ();
+}
+
+void AllPassPhase::setSampleRate (float sampleRate)
+{
+	AudioEffectX::setSampleRate (sampleRate);
+	setupFilters();
 }
 
 //------------------------------------------------------------------------
 void AllPassPhase::setParameter (VstInt32 index, float value)
 {
 	AllPassPhaseProgram* ap = &programs[curProgram];
+	value = clampParameter(value);
 
 	switch (index)
 	{
@@ -140,14 +178,24 @@ void AllPassPhase::setParameter (VstInt32 index, float value)
 void AllPassPhase::setupFilters()
 {
 	freq = knobToFrequency(fFrequency);
+	float sampleRate = getSampleRate();
+	if (sampleRate <= 0.0f)
+		sampleRate = 44100.0f;
+	if (freq >= sampleRate * 0.5f)
+		freq = (int)(sampleRate * 0.49f);
+
 	q = fQ * sqrt(2.0f);
 	if (q <= 0.005f)
 		q = 0.005f;
 
 	const bool resetFilterState = fabs(fFrequency - lastfFreq) > fFrequency / 10 && freq < 500;
 
-	filterL[0].setup(freq, 44100.0f, q);
-	filterR[0].setup(freq, 44100.0f, q);
+	filterL[0].setup(freq, sampleRate, q);
+	filterR[0].setup(freq, sampleRate, q);
+	if (resetFilterState) {
+		filterL[0].zeroBuffers();
+		filterR[0].zeroBuffers();
+	}
 
 	for (int i = 1; i < getIterationCount(); i++) {
 		filterL[i].copyCoefficientsFrom(filterL[0]);
@@ -201,6 +249,38 @@ void AllPassPhase::getParameterName (VstInt32 index, char *label)
 			vst_strncpy(label, "Mix", kVstMaxParamStrLen);
 			break;
 	}
+}
+
+void AllPassPhase::ensureBufferSize(VstInt32 sampleFrames)
+{
+	if (sampleFrames <= bufferSize)
+		return;
+
+	releaseBuffers();
+
+	tempBufferL = new float[sampleFrames] {};
+	tempBufferR = new float[sampleFrames] {};
+	filterBufferL = new float[sampleFrames] {};
+	filterBufferR = new float[sampleFrames] {};
+	bufferSize = sampleFrames;
+}
+
+void AllPassPhase::releaseBuffers()
+{
+	if (tempBufferL)
+		delete[] tempBufferL;
+	if (tempBufferR)
+		delete[] tempBufferR;
+	if (filterBufferL)
+		delete[] filterBufferL;
+	if (filterBufferR)
+		delete[] filterBufferR;
+
+	tempBufferL = 0;
+	tempBufferR = 0;
+	filterBufferL = 0;
+	filterBufferR = 0;
+	bufferSize = 0;
 }
 
 // https://www.musicdsp.org/en/latest/Other/260-exponential-curve-for.html
@@ -294,6 +374,9 @@ bool AllPassPhase::getVendorString (char* text)
 //---------------------------------------------------------------------------
 void AllPassPhase::processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames)
 {
+	if (sampleFrames <= 0)
+		return;
+
 	const int targetIterations = getIterationCount();
 
 	if (targetIterations > curIterations) {
@@ -326,56 +409,41 @@ void AllPassPhase::processReplacing (float** inputs, float** outputs, VstInt32 s
 		return;
 	}
 
-	float *temp1{ new float[sampleFrames] {} };
-	float *temp2{ new float[sampleFrames] {} };
-	int samples = sampleFrames;
+	ensureBufferSize(sampleFrames);
 
 	// copy input to temp array
-	while (--samples >= 0) {
-		*temp1 = *in1++;
-		*temp2 = *in2++;
+	for (int i = 0; i < sampleFrames; i++) {
+		tempBufferL[i] = in1[i];
+		tempBufferR[i] = in2[i];
 		// checks the whole buffer
 		// if it sees anything that isn't silence, reset the silence counter
 		// ensures the entire buffer is processed
-		if (fabs(*temp1) >= noiseFloor || fabs(*temp2) >= noiseFloor) {
+		if (fabs(tempBufferL[i]) >= noiseFloor || fabs(tempBufferR[i]) >= noiseFloor) {
 			samplesSinceSilence = 0;
 		}
-		temp1++;
-		temp2++;
 	}
-
-	// reset pointers
-	temp1 -= sampleFrames;
-	temp2 -= sampleFrames;
-	samples = sampleFrames;
 
 	// filter the audio
 	if (samplesSinceSilence < deactivateAfterSamples) {
-		float *left{ new float[sampleFrames] {} };
-		float *right{ new float[sampleFrames] {} };
-
 		for (int i = 0; i < curIterations; i++) {
-			filterL[i].processBlock(temp1, left, sampleFrames);
-			filterR[i].processBlock(temp2, right, sampleFrames);
+			filterL[i].processBlock(tempBufferL, filterBufferL, sampleFrames);
+			filterR[i].processBlock(tempBufferR, filterBufferR, sampleFrames);
+			int samples = sampleFrames;
+			float *temp1 = tempBufferL;
+			float *temp2 = tempBufferR;
+			float *left = filterBufferL;
+			float *right = filterBufferR;
 			while (--samples >= 0) {
 				*temp1++ = *left++;
 				*temp2++ = *right++;
 			}
-			samples = sampleFrames;
-			temp1 -= sampleFrames;
-			temp2 -= sampleFrames;
-			left -= sampleFrames;
-			right -= sampleFrames;
 		}
-
-		delete[] left;
-		delete[] right;
 	}
 
-	in1 -= sampleFrames;
-	in2 -= sampleFrames;
-
 	const float dryMix = 1.0f - fMix;
+	int samples = sampleFrames;
+	float *temp1 = tempBufferL;
+	float *temp2 = tempBufferR;
 
 	while (--samples >= 0) {
 
@@ -398,9 +466,4 @@ void AllPassPhase::processReplacing (float** inputs, float** outputs, VstInt32 s
 		temp2++;
 	}
 
-	// always reset pointers before deleting the array
-	temp1 -= sampleFrames;
-	temp2 -= sampleFrames;
-	delete[] temp1;
-	delete[] temp2;
 }

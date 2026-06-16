@@ -73,6 +73,7 @@ public:
 	int getIterationCount() const;
 
 	virtual void resume ();
+	virtual void setSampleRate (float sampleRate);
 
 	virtual bool getEffectName (char* name);
 	virtual bool getVendorString (char* text);
@@ -84,10 +85,13 @@ public:
 protected:
 	AllPassPhaseProgram *programs;
 
-	float *buffer;
+	float *tempBufferL;
+	float *tempBufferR;
+	float *filterBufferL;
+	float *filterBufferR;
 	float fFrequency, fIterations, fQ, fMix;
 
-	long size;
+	VstInt32 bufferSize;
 
 	AllPassFilter filterL[kMaxFilters];
 	AllPassFilter filterR[kMaxFilters];
@@ -99,6 +103,9 @@ protected:
 	const int deactivateAfterSamples = 16384;
 	const float noiseFloor = 0.000007f; // Approximately -103 dBFS.
 	float lastfFreq = 0;
+
+	void ensureBufferSize(VstInt32 sampleFrames);
+	void releaseBuffers();
 };
 
 #endif
