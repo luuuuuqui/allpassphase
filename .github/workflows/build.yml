@@ -1,0 +1,30 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  vst3:
+    name: build vst3
+    runs-on: windows-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: configure
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+
+      - name: build
+        run: cmake --build build --config Release --target AllPassPhase_VST3
+
+      - name: upload vst3
+        uses: actions/upload-artifact@v4
+        with:
+          name: AllPassPhase-vst3
+          path: build/AllPassPhase_artefacts/Release/VST3/AllPassPhase+.vst3
+          if-no-files-found: error
