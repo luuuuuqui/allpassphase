@@ -174,15 +174,3 @@ When debugging:
 - do not guess
 - state what information is needed if the available evidence is insufficient
 
-## Git Guidance
-
-- Commit every repository change made during a task before handing control back to the user, unless the user explicitly asks not to commit.
-- Make a separate commit for each logical change, including base structure additions, file corrections, and similar edits.
-- Use Conventional Commits for all commit messages.
-- Commit messages must be entirely lowercase.
-- Before committing, check `git status --short` and avoid including unrelated user changes.
-- A good commit message for documentation-only agent guidance is:
-
-  ```text
-  update agent guidance
-  ```
