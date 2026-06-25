@@ -20,8 +20,6 @@ JUCE is fetched with CMake `FetchContent`. Generated build trees and plugin arte
 - `Source/PluginProcessor.cpp` / `Source/PluginProcessor.h`: processor, APVTS parameters, state persistence, channel layout support, filter setup, silence detection, dry/wet mix, and realtime audio processing.
 - `Source/PluginEditor.cpp` / `Source/PluginEditor.h`: minimal JUCE editor with APVTS-backed sliders.
 - `AllPassFilter.cpp` / `AllPassFilter.h`: biquad-style all-pass filter used by the processor.
-- `LRCrossoverFilter.cpp` / `LRCrossoverFilter.h`: Linkwitz-Riley crossover code retained but not wired into the processor.
-- `HardClip.cpp` / `HardClip.h`: small helper class retained but not used by the main processing path.
 - `README.md`: user-facing description and build instructions.
 
 ## Dependencies And Build

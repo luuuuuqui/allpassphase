@@ -39,8 +39,6 @@ target_sources(AllPassPhase
 		Source/PluginEditor.cpp
 		Source/PluginProcessor.cpp
 		AllPassFilter.cpp
-		HardClip.cpp
-		LRCrossoverFilter.cpp
 )
 
 target_include_directories(AllPassPhase

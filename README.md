@@ -27,10 +27,9 @@ main differences:
 - mono and stereo layouts are handled through `juce` bus layout checks.
 - `clang-format`, optional `clang-tidy`, and a windows `vst3` build workflow were added.
 
-the original pure dsp files are intentionally still recognizable:
+the original all-pass dsp code is intentionally still recognizable:
 
 - `AllPassFilter` remains the filter used by the processing path.
-- `LRCrossoverFilter` and `HardClip` are still present, but they are not part of the main audible processing path.
 - the exponential frequency mapping from the original knob behavior is preserved internally.
 - `Q` is still clamped to a minimum true value of `0.005` to avoid unstable low values.
 - the low-frequency state reset safeguard is preserved for fast modulation.
