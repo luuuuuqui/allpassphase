@@ -1,6 +1,6 @@
-# AllPassPhase
+# AllPassPhase+
 
-AllPassPhase is a VST3 audio effect by `enummusic` that creates phase dispersion by running audio through cascaded all-pass filters. It has no custom GUI in this migration step; the host/JUCE generic editor exposes the parameters.
+AllPassPhase+ is a VST3 audio effect by `Kwwala` that creates phase dispersion by running audio through cascaded all-pass filters. This expanded version pushes the cascade depth for bass music sound design.
 
 ## Parameters
 

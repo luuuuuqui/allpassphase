@@ -8,7 +8,7 @@ Act as a senior software engineer, code reviewer, and technical architect. Read 
 
 ## Project Overview
 
-This repository contains **AllPassPhase+**, a JUCE 8/CMake VST3 audio effect by `enummusic`.
+This repository contains **AllPassPhase+**, a JUCE 8/CMake VST3 audio effect by `Kwwala`.
 
 The plugin creates phase dispersion by running mono or stereo audio through cascaded all-pass filters. It uses a small JUCE editor with `AudioProcessorValueTreeState` attachments for host-visible parameters.
 
