@@ -20,7 +20,7 @@ main differences:
 - the plugin format is now vst3 only.
 - a small native editor was added with sliders attached to plugin parameters.
 - parameters are managed with `juce::AudioProcessorValueTreeState`.
-- parameter state is saved and restored through `apvts` xml state.
+- parameter state is saved and restored through the processor's juce value tree state.
 - the maximum intensity was raised from 50 to 100 cascaded all-pass filters per channel.
 - the processor uses the host sample rate when setting up filters instead of assuming 44.1 khz.
 - temporary audio buffers are prepared outside the realtime processing path instead of being allocated inside every block.
@@ -37,11 +37,10 @@ the original all-pass dsp code is intentionally still recognizable:
 
 ## parameters
 
-- `Frequency`: filter frequency in hz. the host-facing range is approximately 20 hz to 20 khz, using the
-  original exponential knob curve internally.
-- `Q`: filter resonance. values are clamped to a minimum true value of `0.005` in the processing path.
-- `Intensity`: number of cascaded all-pass filters, from `0` to `100`. `0` bypasses the audible effect.
-- `Mix`: dry/wet blend. `0` bypasses the audible effect.
+- `Frequency`: filter frequency in hz. the host-facing range is approximately 20 hz to 20 khz, defaults to `700`, and uses the original exponential knob curve internally.
+- `Q`: filter resonance. it defaults to `0.70710677` and is clamped to a minimum true value of `0.005` in the processing path.
+- `Intensity`: number of cascaded all-pass filters, from `0` to `100`, defaulting to `25`. `0` bypasses the audible effect. the internal parameter id is `Iterations`.
+- `Mix`: dry/wet blend, from `0%` to `100%`, defaulting to `100%`. `0%` bypasses the audible effect.
 
 ## build requirements
 
