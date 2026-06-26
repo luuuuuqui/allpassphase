@@ -7,23 +7,25 @@
 
 #include "AllPassFilter.h"
 
-
-void AllPassFilter::setup(float freq, float sr, float q)
-{
+void AllPassFilter::setup(float frequency, float sr, float resonance) { // NOLINT(bugprone-easily-swappable-parameters)
 
 	// coefficient calculations need to be in double
 	// for filter stability at low frequencies
 
 	const double pi = 3.14159265358979323846;
-	this->freq = freq;
-	this->q = q;
-	double b0, b1, b2, a0, a1, a2;
-	double w0 = 2 * pi * freq / sr; // is this sr or sr/2 ?
+	freq = frequency;
+	q = resonance;
+	double b0;
+	double b1;
+	double b2;
+	double a0;
+	double a1;
+	double a2;
+	double w0 = 2 * pi * frequency / sr; // is this sr or sr/2 ?
 	double cosw0 = cos(w0);
 	double sinw0 = sin(w0);
-	const double ln2 = 0.69314718055994530942;
-	double alpha = sin(w0) * (2 * q);
-	//double alpha = sin(w0) * sinh(ln2 / 2 * q * w0/sinw0);
+	double alpha = sinw0 * (2 * resonance);
+	// double alpha = sin(w0) * sinh(ln2 / 2 * q * w0/sinw0);
 
 	b0 = 1 - alpha;
 	b1 = -2 * cosw0;
@@ -45,38 +47,32 @@ void AllPassFilter::setup(float freq, float sr, float q)
 	co.c3 = a1 / a0;
 	co.c4 = a2 / a0;
 
-	//zeroBuffers();
+	// zeroBuffers();
 }
 
-void AllPassFilter::copyCoefficientsFrom(const AllPassFilter& filter)
-{
+void AllPassFilter::copyCoefficientsFrom(const AllPassFilter& filter) {
 	co.c0 = filter.co.c0;
 	co.c1 = filter.co.c1;
 	co.c2 = filter.co.c2;
 	co.c3 = filter.co.c3;
 	co.c4 = filter.co.c4;
 
-	//zeroBuffers();
+	// zeroBuffers();
 }
 
-void AllPassFilter::zeroBuffers()
-{
+void AllPassFilter::zeroBuffers() {
 	temp.xm1 = 0;
 	temp.xm2 = 0;
 	temp.ym1 = 0;
 	temp.ym2 = 0;
 }
 
-void AllPassFilter::processBlock(float * in, float * out, int numSamples)
-{
-	float tempx, tempy;
+void AllPassFilter::processBlock(const float* in, float* out, int numSamples) {
+	float tempx;
+	double tempy;
 	for (int i = 0; i < numSamples; i++) {
 		tempx = in[i];
-		tempy = co.c0 * tempx +
-			co.c1 * temp.xm1 +
-			co.c2 * temp.xm2 -
-			co.c3 * temp.ym1 -
-			co.c4 * temp.ym2;
+		tempy = (co.c0 * tempx) + (co.c1 * temp.xm1) + (co.c2 * temp.xm2) - (co.c3 * temp.ym1) - (co.c4 * temp.ym2);
 
 		temp.ym2 = temp.ym1;
 		temp.ym1 = tempy;
@@ -84,6 +80,6 @@ void AllPassFilter::processBlock(float * in, float * out, int numSamples)
 		temp.xm2 = temp.xm1;
 		temp.xm1 = tempx;
 
-		out[i] = tempy;
+		out[i] = static_cast<float>(tempy);
 	}
 }

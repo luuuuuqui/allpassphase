@@ -31,7 +31,7 @@ juce_add_plugin(AllPassPhase
 	PLUGIN_MANUFACTURER_CODE Kwwa
 	PLUGIN_CODE Aph3
 	FORMATS VST3
-	PRODUCT_NAME "AllPassPhase"
+	PRODUCT_NAME "AllPassPhase+"
 )
 
 target_sources(AllPassPhase
@@ -79,6 +79,8 @@ if(CLANG_FORMAT_EXE)
 			${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginEditor.h
 			${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginProcessor.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginProcessor.h
+			${CMAKE_CURRENT_SOURCE_DIR}/AllPassFilter.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/AllPassFilter.h
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		COMMENT "Formatting AllPassPhase sources"
 	)

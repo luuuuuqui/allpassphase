@@ -155,14 +155,21 @@ void AllPassPhaseAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
 	}
 
 	const auto dryMix = 1.0f - currentMix;
+	std::array<float*, maxChannels> channelPointers{};
+	std::array<const float*, maxChannels> dryPointers{};
+
+	for (int channel = 0; channel < numChannels; ++channel) {
+		channelPointers[static_cast<size_t>(channel)] = buffer.getWritePointer(channel);
+		dryPointers[static_cast<size_t>(channel)] = dryBuffer.getReadPointer(channel);
+	}
 
 	for (int sample = 0; sample < numSamples; ++sample) {
 		bool hasSignal = false;
 
 		for (int channel = 0; channel < numChannels; ++channel) {
-			auto* channelData = buffer.getWritePointer(channel);
+			auto* channelData = channelPointers[static_cast<size_t>(channel)];
 			const auto wetSample = channelData[sample];
-			const auto drySample = dryBuffer.getSample(channel, sample);
+			const auto drySample = dryPointers[static_cast<size_t>(channel)][sample];
 
 			if (std::abs(wetSample) >= noiseFloor)
 				hasSignal = true;

@@ -1,5 +1,5 @@
-#ifndef __AllPassFilter__
-#define __AllPassFilter__
+#ifndef ALLPASSFILTER_H
+#define ALLPASSFILTER_H
 
 // code referenced:
 // https://www.musicdsp.org/en/latest/Filters/197-rbj-audio-eq-cookbook.html
@@ -7,8 +7,7 @@
 // https://www.musicdsp.org/en/latest/Filters/266-4th-order-linkwitz-riley-filters.html
 
 class AllPassFilter {
-private:
-
+  private:
 	// coefficient calculations need to be in double
 	// for filter stability at low frequencies
 	struct filterCoefficients {
@@ -16,24 +15,21 @@ private:
 	} co;
 
 	struct {
-		double xm1 = 0.0f;
-		double xm2 = 0.0f;
-		double ym1 = 0.0f, ym2 = 0.0f;
+		double xm1 = 0.0;
+		double xm2 = 0.0;
+		double ym1 = 0.0, ym2 = 0.0;
 	} temp;
 
-	float freq = 100.0f;
+	float freq = 100.0F;
 	float q;
-public:
-	void setup(float freq, float sr, float q);
+
+  public:
+	void setup(float frequency, float sr, float resonance);
 	void copyCoefficientsFrom(const AllPassFilter& filter);
 	void zeroBuffers();
-	void processBlock(float * in, float * out, int numSamples);
-	float getFreq() {
-		return freq;
-	}
-	float getQ() {
-		return q;
-	}
+	void processBlock(const float* in, float* out, int numSamples);
+	float getFreq() const { return freq; }
+	float getQ() const { return q; }
 };
 
 #endif

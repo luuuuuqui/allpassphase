@@ -42,7 +42,7 @@ class AllPassPhaseAudioProcessor final : public juce::AudioProcessor {
 	static float frequencyToKnob(float frequencyHz);
 
   private:
-	static constexpr int maxFilters = 50;
+	static constexpr int maxFilters = 100;
 	static constexpr int maxChannels = 2;
 	static constexpr int deactivateAfterSamples = 16384;
 	static constexpr float noiseFloor = 0.000007f;
