@@ -4,7 +4,7 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
-#include "AllPassFilter.h"
+#include "Dsp/AllPassFilter.h"
 
 class AllPassPhaseAudioProcessor final : public juce::AudioProcessor {
   public:

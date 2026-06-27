@@ -15,6 +15,7 @@ main differences:
 - the build was replaced with a standalone `CMakeLists.txt` project.
 - juce is fetched automatically with cmake `FetchContent`.
 - the project no longer requires the steinberg vst2 sdk or copying files into the old `aDelay` sample folder.
+- the pure dsp files are grouped under `Source/Dsp/`.
 - the product is now named AllPassPhase+.
 - the vendor identity is now Kwwala.
 - the plugin format is now vst3 only.

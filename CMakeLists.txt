@@ -34,18 +34,26 @@ juce_add_plugin(AllPassPhase
 	PRODUCT_NAME "AllPassPhase+"
 )
 
+set(ALLPASSPHASE_SOURCES
+	Source/Dsp/AllPassFilter.cpp
+	Source/Dsp/AllPassFilter.h
+	Source/PluginEditor.cpp
+	Source/PluginEditor.h
+	Source/PluginProcessor.cpp
+	Source/PluginProcessor.h
+)
+
 target_sources(AllPassPhase
 	PRIVATE
-		Source/PluginEditor.cpp
-		Source/PluginProcessor.cpp
-		AllPassFilter.cpp
+		${ALLPASSPHASE_SOURCES}
 )
 
 target_include_directories(AllPassPhase
 	PRIVATE
-		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/Source
 )
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source PREFIX "Source" FILES ${ALLPASSPHASE_SOURCES})
 
 target_compile_definitions(AllPassPhase
 	PUBLIC
@@ -75,12 +83,7 @@ find_program(CLANG_FORMAT_EXE NAMES clang-format)
 if(CLANG_FORMAT_EXE)
 	add_custom_target(format
 		COMMAND ${CLANG_FORMAT_EXE} -i
-			${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginEditor.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginEditor.h
-			${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginProcessor.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/Source/PluginProcessor.h
-			${CMAKE_CURRENT_SOURCE_DIR}/AllPassFilter.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/AllPassFilter.h
+			${ALLPASSPHASE_SOURCES}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		COMMENT "Formatting AllPassPhase sources"
 	)

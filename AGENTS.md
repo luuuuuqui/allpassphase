@@ -19,7 +19,7 @@ JUCE is fetched with CMake `FetchContent`. Generated build trees and plugin arte
 - `CMakeLists.txt`: JUCE 8 `FetchContent` setup, VST3 target, source list, and optional clang tooling hooks.
 - `Source/PluginProcessor.cpp` / `Source/PluginProcessor.h`: processor, APVTS parameters, state persistence, channel layout support, filter setup, silence detection, dry/wet mix, and realtime audio processing.
 - `Source/PluginEditor.cpp` / `Source/PluginEditor.h`: minimal JUCE editor with APVTS-backed sliders.
-- `AllPassFilter.cpp` / `AllPassFilter.h`: biquad-style all-pass filter used by the processor.
+- `Source/Dsp/AllPassFilter.cpp` / `Source/Dsp/AllPassFilter.h`: biquad-style all-pass filter used by the processor.
 - `README.md`: user-facing description and build instructions.
 
 ## Dependencies And Build
