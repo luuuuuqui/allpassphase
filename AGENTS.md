@@ -19,9 +19,9 @@ JUCE is fetched with CMake `FetchContent`. Generated build trees and plugin arte
 - `CMakeLists.txt`: JUCE 8 `FetchContent` setup, VST3 target, source list, and optional clang tooling hooks.
 - `Source/PluginProcessor.cpp` / `Source/PluginProcessor.h`: processor, APVTS parameters, state persistence, channel layout support, filter setup, silence detection, dry/wet mix, and realtime audio processing.
 - `Source/PluginEditor.cpp` / `Source/PluginEditor.h`: minimal JUCE editor with APVTS-backed sliders.
-- `AllPassFilter.cpp` / `AllPassFilter.h`: biquad-style all-pass filter used by the processor.
-- `LRCrossoverFilter.cpp` / `LRCrossoverFilter.h`: Linkwitz-Riley crossover code retained but not wired into the processor.
-- `HardClip.cpp` / `HardClip.h`: small helper class retained but not used by the main processing path.
+- `Source/Dsp/AllPassFilter.cpp` / `Source/Dsp/AllPassFilter.h`: biquad-style all-pass filter used by the processor.
+- `Source/Dsp/LRCrossoverFilter.cpp` / `Source/Dsp/LRCrossoverFilter.h`: Linkwitz-Riley crossover code retained but not wired into the processor.
+- `Source/Dsp/HardClip.cpp` / `Source/Dsp/HardClip.h`: small helper class retained but not used by the main processing path.
 - `README.md`: user-facing description and build instructions.
 
 ## Dependencies And Build
@@ -64,7 +64,7 @@ Use `-DALLPASSPHASE_ENABLE_CLANG_TIDY=ON` only when clang-tidy is available loca
 
 - `Frequency`, `Q`, `Iterations`, and `Mix` are the active APVTS parameter IDs.
 - `Frequency` is host-facing in Hz and preserves the original exponential VST2 knob mapping internally.
-- `Iterations` is host-facing as `Intensity` and maps to up to 100 cascaded all-pass filters.
+- `Iterations` is host-facing as `Intensity` and maps to up to 50 cascaded all-pass filters.
 - `Q` is clamped to a minimum real value of `0.005` to avoid self-oscillation.
 - `Mix` at `0` bypasses the audible effect.
 - `Iterations` at `0` bypasses the audible effect.

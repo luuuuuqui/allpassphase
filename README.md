@@ -59,6 +59,7 @@ cmake --build build --config Release --target AllPassPhase_VST3
 ## Migration Notes
 
 - The VST2 entry point and `AudioEffectX` processor were removed.
+- The pure DSP files are grouped under `Source/Dsp/`.
 - `AllPassFilter`, `LRCrossoverFilter`, and `HardClip` are preserved as the existing pure DSP files.
 - `AllPassFilter` remains the processing filter used by the plugin. `LRCrossoverFilter` and `HardClip` are still compiled but not used in the main processing path, matching the old repository behavior.
 - Stereo remains the main layout. Mono is supported by using the left-channel filter bank predictably.
