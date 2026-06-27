@@ -76,6 +76,12 @@ Use `-DALLPASSPHASE_ENABLE_CLANG_TIDY=ON` only when clang-tidy is available loca
 - Use `clang-format` for changed C++ files when available.
 - Avoid reformatting unrelated legacy DSP files unless they are part of the task.
 
+## Git And Commits
+
+- Write commit messages in english and lowercase.
+- Keep all commit message text in english and lowercase except literal user-facing text or identifiers inside quotes or backticks.
+- Prefer short, imperative, present-tense subjects, such as `add VST3 build workflow` or `fix Windows build runner`.
+
 ## Verification
 
 For code changes, run lightweight checks first:
